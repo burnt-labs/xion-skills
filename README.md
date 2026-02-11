@@ -2,6 +2,8 @@
 
 A collection of skills for AI Coding Agents to work with the Xion blockchain. These skills provide packaged instructions and scripts that extend Claude's capabilities for Xion blockchain development and interaction.
 
+Skills follow the [Agent Skills](https://agentskills.io/) format.
+
 ## Overview
 
 This repository contains skills that enable AI assistants to:
@@ -9,6 +11,36 @@ This repository contains skills that enable AI assistants to:
 - Install and configure the Xion CLI daemon (`xiond`)
 - Manage accounts and execute transactions on Xion
 - Deploy and interact with CosmWasm smart contracts
+
+## Installation
+
+### Using skills.sh (Recommended)
+
+Install all skills using the `skills` CLI:
+
+```bash
+npx skills add burnt-labs/xion-skills
+```
+
+The CLI will download the skills and configure them for use with your AI agent. Skills are automatically available once installed.
+
+### For Claude Code
+
+Copy the skills to your local skills directory:
+
+```bash
+# Install all skills
+cp -r skills/* ~/.claude/skills/
+
+# Or install individual skills
+cp -r skills/xiond-init ~/.claude/skills/
+cp -r skills/xiond-usage ~/.claude/skills/
+cp -r skills/xiond-wasm ~/.claude/skills/
+```
+
+### For claude.ai
+
+Add the skill to project knowledge or paste SKILL.md contents into the conversation.
 
 ## Skills
 
@@ -103,26 +135,6 @@ bash /mnt/skills/user/xiond-wasm/scripts/instantiate-contract.sh 123 "my-counter
 - Funded wallet account
 
 **When to use**: When deploying or interacting with CosmWasm smart contracts on Xion.
-
-## Installation
-
-### For Claude Code
-
-Copy the skills to your local skills directory:
-
-```bash
-# Install all skills
-cp -r skills/* ~/.claude/skills/
-
-# Or install individual skills
-cp -r skills/xiond-init ~/.claude/skills/
-cp -r skills/xiond-usage ~/.claude/skills/
-cp -r skills/xiond-wasm ~/.claude/skills/
-```
-
-### For claude.ai
-
-Add the skill to project knowledge or paste SKILL.md contents into the conversation.
 
 ## Skill Dependencies
 
@@ -231,8 +243,15 @@ When creating new skills, follow the guidelines in [AGENTS.md](AGENTS.md):
 
 ## Resources
 
+### Xion Blockchain
+
 - [Xion Documentation](https://docs.burnt.com/xion)
 - [Xion Daemon Setup Guide](https://docs.burnt.com/xion/developers/getting-started-advanced/setup-local-environment/interact-with-xion-chain-setup-xion-daemon)
 - [Contract Deployment Guide](https://docs.burnt.com/xion/developers/getting-started-advanced/your-first-contract/deploy-a-cosmwasm-smart-contract)
 - [Public Endpoints](https://docs.burnt.com/xion/developers/section-overview/public-endpoints-and-resources)
 - [CosmWasm Documentation](https://docs.cosmwasm.com/)
+
+### Skills Ecosystem
+
+- [Agent Skills Format](https://agentskills.io/)
+- [skills.sh Documentation](https://skills.sh/docs)

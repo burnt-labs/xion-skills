@@ -1,70 +1,91 @@
 ---
 name: xiond-init
-description: Install and verify the `xiond` CLI on macOS/Linux. Use this whenever the user sees "xiond: command not found", needs to install/upgrade xiond, or is blocked from any Xion CLI task due to missing xiond.
+description: Install, upgrade, and verify the `xiond` CLI for Xion blockchain. Use this proactively whenever the user mentions xiond installation, setup, initialization, configuration, environment setup, or encounters "xiond: command not found". Also use when checking xiond version or upgrading to latest version. This skill handles macOS, Debian/Ubuntu, Red Hat/CentOS/Fedora, and Alpine Linux.
 ---
 
-# Xiond Installation
+# Xiond Installation & Management
 
-Installs the `xiond` command-line interface (CLI) daemon for interacting with the Xion blockchain. Supports multiple operating systems including macOS, Debian-based Linux, Red Hat-based Linux, and Alpine Linux.
+Installs, upgrades, and manages the `xiond` command-line interface for interacting with the Xion blockchain. Cross-platform support for major operating systems.
+
+## When to Use
+
+- User needs to install xiond for the first time
+- User wants to check if xiond is installed and its version
+- User wants to upgrade to the latest xiond version
+- User encounters "xiond: command not found" error
+- User is setting up their Xion development environment
 
 ## How It Works
 
-1. Detects the operating system type
-2. Checks if xiond is already installed
-3. Executes the appropriate package manager installation command for the detected OS
-4. Verifies installation by running `xiond version`
-5. Returns installation status and version information
+1. **Detect OS**: Automatically identifies macOS, Debian, Red Hat, or Alpine Linux
+2. **Check Status**: Verifies if xiond is already installed and its version
+3. **Install/Upgrade**: Uses appropriate package manager for the detected OS
+4. **Verify**: Confirms successful installation by checking version
 
 ## Compatibility
 
 - Requires `bash` and `python3`
 - May require `sudo` (Linux installs)
-- Requires network access to Burnt package repositories (see `references/installation.md`)
+- Requires network access to Burnt package repositories
+- See `references/installation.md` for detailed OS-specific instructions
 
 ## Usage
 
+### Install xiond
+
 ```bash
 bash /mnt/skills/user/xiond-init/scripts/install.sh
 ```
 
-**Arguments:**
+Installs xiond using the appropriate package manager for your OS.
 
-- No arguments required - the script auto-detects the OS
-
-**Examples:**
+### Check Version
 
 ```bash
-# Install xiond on macOS
-bash /mnt/skills/user/xiond-init/scripts/install.sh
-
-# Install xiond on Debian/Ubuntu
-bash /mnt/skills/user/xiond-init/scripts/install.sh
-
-# Install xiond on Red Hat/CentOS/Fedora
-bash /mnt/skills/user/xiond-init/scripts/install.sh
+bash /mnt/skills/user/xiond-init/scripts/check-version.sh
 ```
+
+Checks if xiond is installed and returns version information.
+
+### Upgrade xiond
+
+```bash
+bash /mnt/skills/user/xiond-init/scripts/upgrade.sh
+```
+
+Upgrades xiond to the latest version using your system's package manager.
 
 ## Output
 
-The script outputs JSON to stdout with the following structure:
+All scripts output JSON to stdout:
 
+**Check Version (installed):**
 ```json
 {
   "success": true,
-  "os": "macOS",
   "installed": true,
   "version": "xiond version 1.0.0",
-  "message": "xiond is already installed"
+  "path": "/usr/local/bin/xiond",
+  "message": "xiond is installed"
 }
 ```
 
-or
+**Check Version (not installed):**
+```json
+{
+  "success": true,
+  "installed": false,
+  "version": null,
+  "path": null,
+  "message": "xiond is not installed"
+}
+```
 
+**Install/Upgrade Success:**
 ```json
 {
   "success": true,
   "os": "macOS",
-  "installed": false,
   "version": "xiond version 1.0.0",
   "message": "xiond installed successfully"
 }
@@ -72,11 +93,10 @@ or
 
 ## Present Results to User
 
-When presenting results to the user:
-
-- **If already installed**: "xiond is already installed (version: X.X.X)"
-- **If installation succeeds**: "xiond has been successfully installed (version: X.X.X)"
-- **If installation fails**: "Installation failed: [error message]. Please check the installation reference for manual steps."
+- **Already installed**: "xiond is already installed (version: X.X.X)"
+- **Installation succeeds**: "xiond has been successfully installed (version: X.X.X)"
+- **Upgrade succeeds**: "xiond upgraded from vOLD to vNEW"
+- **Failure**: "Installation failed: [error]. Check references/installation.md for manual steps."
 
 ## Troubleshooting
 
@@ -85,20 +105,24 @@ When presenting results to the user:
 - If tap fails, try: `brew tap burnt-labs/xion` manually
 
 **Debian-based Linux:**
-- Requires sudo privileges for apt operations
+- Requires sudo privileges
 - If GPG key import fails, check network connectivity
-- Verify repository URL: `http://packages.burnt.com/apt`
+- Repository: `http://packages.burnt.com/apt`
 
 **Red Hat-based Linux:**
-- Requires sudo privileges for dnf/yum operations
+- Requires sudo privileges
 - Ensure dnf or yum is available
-- Check repository URL: `https://packages.burnt.com/yum/`
+- Repository: `https://packages.burnt.com/yum/`
 
 **Alpine Linux:**
-- Requires sudo privileges for apk operations
-- Verify repository URL: `https://alpine.fury.io/burnt`
+- Requires sudo privileges
+- Repository: `https://alpine.fury.io/burnt`
 
 **General:**
-- If installation fails, refer to `references/installation.md` for manual installation steps
+- If installation fails, refer to `references/installation.md` for manual steps
 - Verify network connectivity to package repositories
 - Check system logs for detailed error messages
+
+## References
+
+- `references/installation.md` — Detailed OS-specific installation instructions and troubleshooting

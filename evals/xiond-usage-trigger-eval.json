@@ -1,0 +1,102 @@
+[
+  {
+    "query": "Create a new wallet called my-main-wallet",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to set up a new Xion account",
+    "should_trigger": true
+  },
+  {
+    "query": "What's the address of my key 'dev-wallet'?",
+    "should_trigger": true
+  },
+  {
+    "query": "Show me my wallet details for 'alice'",
+    "should_trigger": true
+  },
+  {
+    "query": "List all my accounts/keys",
+    "should_trigger": true
+  },
+  {
+    "query": "I have a 24-word mnemonic. Help me restore my wallet as 'recovered'",
+    "should_trigger": true
+  },
+  {
+    "query": "Recover my account from seed phrase",
+    "should_trigger": true
+  },
+  {
+    "query": "Send 5000 uxion from my-wallet to xion1def456...",
+    "should_trigger": true
+  },
+  {
+    "query": "Transfer some tokens to another address",
+    "should_trigger": true
+  },
+  {
+    "query": "Check the balance of xion1abc123...",
+    "should_trigger": true
+  },
+  {
+    "query": "How much XION do I have in my account?",
+    "should_trigger": true
+  },
+  {
+    "query": "What's the status of transaction 0xABC123?",
+    "should_trigger": true
+  },
+  {
+    "query": "Check if my tx went through - hash is DEF456GHI789",
+    "should_trigger": true
+  },
+  {
+    "query": "Get me some testnet tokens from the faucet",
+    "should_trigger": true
+  },
+  {
+    "query": "What's the current block height on Xion testnet?",
+    "should_trigger": true
+  },
+  {
+    "query": "Install xiond on my computer",
+    "should_trigger": false
+  },
+  {
+    "query": "I'm getting 'xiond: command not found'",
+    "should_trigger": false
+  },
+  {
+    "query": "Upgrade xiond to latest version",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy my CosmWasm smart contract",
+    "should_trigger": false
+  },
+  {
+    "query": "Upload the WASM file to the chain",
+    "should_trigger": false
+  },
+  {
+    "query": "Instantiate contract with code ID 456",
+    "should_trigger": false
+  },
+  {
+    "query": "Execute the increment function on my counter contract",
+    "should_trigger": false
+  },
+  {
+    "query": "Query my contract at xion1contract... with {\"get_count\":{}}",
+    "should_trigger": false
+  },
+  {
+    "query": "Migrate my contract to a new code version",
+    "should_trigger": false
+  },
+  {
+    "query": "Optimize my Rust contract for deployment",
+    "should_trigger": false
+  }
+]

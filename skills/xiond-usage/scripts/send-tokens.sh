@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Send tokens between accounts using xiond
-# Usage: send-tokens.sh <from> <to> <amount> [chain-id] [node-url]
+# Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local] [chain-id] [node-url]
 # Outputs JSON to stdout, status messages to stderr
 
 emit_json() {
@@ -13,24 +13,93 @@ print(json.dumps(payload, ensure_ascii=False))
 PY
 }
 
+# Network configuration
+get_network_config() {
+    local network="$1"
+    case "$network" in
+        testnet|test)
+            echo "xion-testnet-2 https://rpc.xion-testnet-2.burnt.com:443"
+            ;;
+        mainnet|main|prod)
+            echo "xion-mainnet-1 https://rpc.xion-mainnet-1.burnt.com"
+            ;;
+        local|dev)
+            echo "xion-local http://localhost:26657"
+            ;;
+        *)
+            echo "" ""
+            return 1
+            ;;
+    esac
+}
+
 # Check if xiond is installed
 if ! command -v xiond &> /dev/null; then
     PAYLOAD_JSON='{"success":false,"error":"xiond command not found. Please use the xiond-init skill to install xiond first."}' emit_json
     exit 1
 fi
 
-if [[ $# -lt 3 ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [chain-id] [node-url]"}' emit_json
+# Parse arguments
+FROM=""
+TO=""
+AMOUNT=""
+NETWORK="${XION_NETWORK:-testnet}"
+CHAIN_ID=""
+NODE_URL=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --network|-n)
+            NETWORK="$2"
+            shift 2
+            ;;
+        --network=*)
+            NETWORK="${1#*=}"
+            shift
+            ;;
+        --help|-h)
+            PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local]","hint":"Or set XION_NETWORK environment variable"}' emit_json
+            exit 1
+            ;;
+        *)
+            if [[ -z "$FROM" ]]; then
+                FROM="$1"
+            elif [[ -z "$TO" ]]; then
+                TO="$1"
+            elif [[ -z "$AMOUNT" ]]; then
+                AMOUNT="$1"
+            elif [[ -z "$CHAIN_ID" ]]; then
+                CHAIN_ID="$1"
+            elif [[ -z "$NODE_URL" ]]; then
+                NODE_URL="$1"
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [[ -z "$FROM" ]] || [[ -z "$TO" ]] || [[ -z "$AMOUNT" ]]; then
+    PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local]"}' emit_json
     exit 1
 fi
 
-FROM="$1"
-TO="$2"
-AMOUNT="$3"
-CHAIN_ID="${4:-xion-testnet-2}"
-NODE_URL="${5:-https://rpc.xion-testnet-2.burnt.com:443}"
+# Set network config if not explicitly provided
+if [[ -z "$CHAIN_ID" ]] || [[ -z "$NODE_URL" ]]; then
+    NET_CONFIG=$(get_network_config "$NETWORK")
+    if [[ -z "$NET_CONFIG" ]]; then
+        PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
+import json, os
+print(json.dumps({"success": False, "error": f"Unknown network: {os.environ['NETWORK']}. Use 'testnet', 'mainnet', or 'local'."}))
+PY
+)" emit_json
+        exit 1
+    fi
+    read -r DEFAULT_CHAIN_ID DEFAULT_NODE_URL <<< "$NET_CONFIG"
+    CHAIN_ID="${CHAIN_ID:-$DEFAULT_CHAIN_ID}"
+    NODE_URL="${NODE_URL:-$DEFAULT_NODE_URL}"
+fi
 
-echo "Sending $AMOUNT from $FROM to $TO..." >&2
+echo "Sending $AMOUNT from $FROM to $TO on $NETWORK ($CHAIN_ID)..." >&2
 
 # Execute the transaction
 if ! RESULT=$(xiond tx bank send "$FROM" "$TO" "$AMOUNT" \
@@ -68,7 +137,7 @@ if [[ -z "$TXHASH" ]]; then
     exit 1
 fi
 
-PAYLOAD_JSON="$(TXHASH="$TXHASH" FROM="$FROM" TO="$TO" AMOUNT="$AMOUNT" CHAIN_ID="$CHAIN_ID" python3 - <<'PY'
+PAYLOAD_JSON="$(TXHASH="$TXHASH" FROM="$FROM" TO="$TO" AMOUNT="$AMOUNT" CHAIN_ID="$CHAIN_ID" NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
 print(json.dumps({
     "success": True,
@@ -77,6 +146,7 @@ print(json.dumps({
     "to": os.environ["TO"],
     "amount": os.environ["AMOUNT"],
     "chain_id": os.environ["CHAIN_ID"],
+    "network": os.environ["NETWORK"],
 }))
 PY
 )" emit_json

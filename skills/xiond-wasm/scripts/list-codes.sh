@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# Query contract state
-# Usage: query-contract.sh [options] <contract-address> <query-msg>
+# List all uploaded WASM codes on the chain
+# Usage: list-codes.sh [options]
 # Outputs JSON to stdout, status messages to stderr
 
 NETWORK_CONFIG() {
@@ -25,13 +25,9 @@ NETWORK_CONFIG() {
 
 show_help() {
     cat >&2 << 'EOF'
-Usage: query-contract.sh [options] <contract-address> <query-msg>
+Usage: list-codes.sh [options]
 
-Query the state of an instantiated WASM contract.
-
-Arguments:
-  <contract-address>  Contract address to query
-  <query-msg>         JSON query message
+List all uploaded WASM code IDs on the XION blockchain.
 
 Options:
   --network <network>    Network to use: testnet, mainnet, or local
@@ -43,9 +39,9 @@ Environment:
   XION_NETWORK           Default network (testnet, mainnet, local)
 
 Examples:
-  query-contract.sh xion1... '{"get_count":{}}'
-  query-contract.sh --network mainnet xion1... '{"get_count":{}}'
-  XION_NETWORK=local query-contract.sh xion1... '{"get_count":{}}'
+  list-codes.sh
+  list-codes.sh --network mainnet
+  XION_NETWORK=local list-codes.sh
 EOF
 }
 
@@ -65,8 +61,6 @@ fi
 NETWORK="${XION_NETWORK:-testnet}"
 NODE_URL=""
 
-POSITIONAL_ARGS=()
-
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --network)
@@ -82,21 +76,11 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            POSITIONAL_ARGS+=("$1")
-            shift
+            PAYLOAD_JSON='{"success":false,"error":"Unknown option. Use --help for usage."}' emit_json
+            exit 1
             ;;
     esac
 done
-
-set -- "${POSITIONAL_ARGS[@]}"
-
-if [[ $# -lt 2 ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Usage: query-contract.sh [options] <contract-address> <query-msg>. Use --help for details."}' emit_json
-    exit 1
-fi
-
-CONTRACT="$1"
-QUERY_MSG="$2"
 
 if ! DEFAULT_NODE_URL=$(NETWORK_CONFIG "$NETWORK" 2>/dev/null); then
     PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
@@ -109,16 +93,9 @@ fi
 
 NODE_URL="${NODE_URL:-$DEFAULT_NODE_URL}"
 
-if ! echo "$QUERY_MSG" | python3 -m json.tool &> /dev/null; then
-    PAYLOAD_JSON='{"success":false,"error":"query-msg must be valid JSON"}' emit_json
-    exit 1
-fi
+echo "Listing uploaded WASM codes on $NETWORK..." >&2
 
-echo "Querying contract $CONTRACT on $NETWORK..." >&2
-
-if ! RESULT=$(xiond query wasm contract-state smart "$CONTRACT" "$QUERY_MSG" \
-    --output json \
-    --node "$NODE_URL" 2>&1); then
+if ! RESULT=$(xiond query wasm list-code --node "$NODE_URL" --output json 2>&1); then
     PAYLOAD_JSON="$(ERR_MSG="$RESULT" python3 - <<'PY'
 import json, os
 err = os.environ.get("ERR_MSG", "")
@@ -128,19 +105,34 @@ PY
     exit 1
 fi
 
-PAYLOAD_JSON="$(CONTRACT="$CONTRACT" RAW="$RESULT" NETWORK="$NETWORK" python3 - <<'PY'
+PAYLOAD_JSON="$(RAW="$RESULT" NETWORK="$NETWORK" python3 - <<'PY'
 import json, os, sys
-contract = os.environ["CONTRACT"]
+
 raw = os.environ.get("RAW", "")
 network = os.environ["NETWORK"]
 
 try:
     data = json.loads(raw)
 except Exception:
-    print(json.dumps({"success": False, "error": "xiond returned non-JSON output", "contract": contract, "raw": raw}))
+    print(json.dumps({"success": False, "error": "xiond returned non-JSON output"}))
     sys.exit(0)
 
-result = data.get("data", data)
-print(json.dumps({"success": True, "network": network, "contract": contract, "result": result}))
+code_infos = data.get("code_infos", data.get("codes", []))
+codes = []
+
+for code in code_infos:
+    codes.append({
+        "code_id": code.get("code_id", ""),
+        "creator": code.get("creator", ""),
+        "data_hash": code.get("data_hash", code.get("checksum", "")),
+        "instantiate_permission": code.get("instantiate_permission", {})
+    })
+
+print(json.dumps({
+    "success": True,
+    "network": network,
+    "count": len(codes),
+    "codes": codes
+}))
 PY
 )" emit_json

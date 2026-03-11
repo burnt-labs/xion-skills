@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# Query contract state
-# Usage: query-contract.sh [options] <contract-address> <query-msg>
+# Query contract information by address
+# Usage: query-contract-info.sh [options] <contract-address>
 # Outputs JSON to stdout, status messages to stderr
 
 NETWORK_CONFIG() {
@@ -25,13 +25,12 @@ NETWORK_CONFIG() {
 
 show_help() {
     cat >&2 << 'EOF'
-Usage: query-contract.sh [options] <contract-address> <query-msg>
+Usage: query-contract-info.sh [options] <contract-address>
 
-Query the state of an instantiated WASM contract.
+Query information about a contract instance.
 
 Arguments:
   <contract-address>  Contract address to query
-  <query-msg>         JSON query message
 
 Options:
   --network <network>    Network to use: testnet, mainnet, or local
@@ -43,9 +42,9 @@ Environment:
   XION_NETWORK           Default network (testnet, mainnet, local)
 
 Examples:
-  query-contract.sh xion1... '{"get_count":{}}'
-  query-contract.sh --network mainnet xion1... '{"get_count":{}}'
-  XION_NETWORK=local query-contract.sh xion1... '{"get_count":{}}'
+  query-contract-info.sh xion1...
+  query-contract-info.sh --network mainnet xion1...
+  XION_NETWORK=local query-contract-info.sh xion1...
 EOF
 }
 
@@ -90,13 +89,12 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}"
 
-if [[ $# -lt 2 ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Usage: query-contract.sh [options] <contract-address> <query-msg>. Use --help for details."}' emit_json
+if [[ $# -lt 1 ]]; then
+    PAYLOAD_JSON='{"success":false,"error":"contract-address is required. Use --help for details."}' emit_json
     exit 1
 fi
 
 CONTRACT="$1"
-QUERY_MSG="$2"
 
 if ! DEFAULT_NODE_URL=$(NETWORK_CONFIG "$NETWORK" 2>/dev/null); then
     PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
@@ -109,16 +107,9 @@ fi
 
 NODE_URL="${NODE_URL:-$DEFAULT_NODE_URL}"
 
-if ! echo "$QUERY_MSG" | python3 -m json.tool &> /dev/null; then
-    PAYLOAD_JSON='{"success":false,"error":"query-msg must be valid JSON"}' emit_json
-    exit 1
-fi
+echo "Querying contract info for $CONTRACT on $NETWORK..." >&2
 
-echo "Querying contract $CONTRACT on $NETWORK..." >&2
-
-if ! RESULT=$(xiond query wasm contract-state smart "$CONTRACT" "$QUERY_MSG" \
-    --output json \
-    --node "$NODE_URL" 2>&1); then
+if ! RESULT=$(xiond query wasm contract "$CONTRACT" --node "$NODE_URL" --output json 2>&1); then
     PAYLOAD_JSON="$(ERR_MSG="$RESULT" python3 - <<'PY'
 import json, os
 err = os.environ.get("ERR_MSG", "")
@@ -130,6 +121,7 @@ fi
 
 PAYLOAD_JSON="$(CONTRACT="$CONTRACT" RAW="$RESULT" NETWORK="$NETWORK" python3 - <<'PY'
 import json, os, sys
+
 contract = os.environ["CONTRACT"]
 raw = os.environ.get("RAW", "")
 network = os.environ["NETWORK"]
@@ -137,10 +129,21 @@ network = os.environ["NETWORK"]
 try:
     data = json.loads(raw)
 except Exception:
-    print(json.dumps({"success": False, "error": "xiond returned non-JSON output", "contract": contract, "raw": raw}))
+    print(json.dumps({"success": False, "error": "xiond returned non-JSON output", "contract": contract}))
     sys.exit(0)
 
-result = data.get("data", data)
-print(json.dumps({"success": True, "network": network, "contract": contract, "result": result}))
+result = {
+    "success": True,
+    "network": network,
+    "contract_address": contract,
+    "code_id": data.get("code_id", ""),
+    "creator": data.get("creator", ""),
+    "admin": data.get("admin", ""),
+    "label": data.get("label", ""),
+    "created": data.get("created", {}),
+    "ibc_port_id": data.get("ibc_port_id", "")
+}
+
+print(json.dumps(result))
 PY
 )" emit_json

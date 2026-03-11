@@ -1,0 +1,82 @@
+[
+  {
+    "query": "I keep getting 'xiond: command not found' when I try to run xiond. Can you help?",
+    "should_trigger": true
+  },
+  {
+    "query": "How do I install xiond on my MacBook?",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to set up my Xion development environment",
+    "should_trigger": true
+  },
+  {
+    "query": "What version of xiond do I have installed?",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you check if xiond is installed on my system?",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to upgrade xiond to the latest version",
+    "should_trigger": true
+  },
+  {
+    "query": "Help me initialize xiond on Ubuntu",
+    "should_trigger": true
+  },
+  {
+    "query": "xiond setup on Linux - I'm stuck",
+    "should_trigger": true
+  },
+  {
+    "query": "Configure xiond CLI for the first time",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm getting started with Xion and need to install the CLI tools",
+    "should_trigger": true
+  },
+  {
+    "query": "Create a new wallet for me",
+    "should_trigger": false
+  },
+  {
+    "query": "Send 1000 uxion to xion1abc123",
+    "should_trigger": false
+  },
+  {
+    "query": "What's my account balance?",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy a smart contract to Xion",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to upload a CosmWasm contract",
+    "should_trigger": false
+  },
+  {
+    "query": "Query my contract state",
+    "should_trigger": false
+  },
+  {
+    "query": "How do I use xiond to send tokens?",
+    "should_trigger": false
+  },
+  {
+    "query": "Instantiate a contract with code ID 123",
+    "should_trigger": false
+  },
+  {
+    "query": "List all my keys in the keyring",
+    "should_trigger": false
+  },
+  {
+    "query": "Migrate my contract to a new version",
+    "should_trigger": false
+  }
+]

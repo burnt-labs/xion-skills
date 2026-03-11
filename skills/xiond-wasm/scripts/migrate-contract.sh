@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# Execute a contract message
-# Usage: execute-contract.sh [options] <contract-address> <execute-msg> <wallet>
+# Migrate a contract to a new code version
+# Usage: migrate-contract.sh [options] <contract-address> <new-code-id> <migrate-msg> <wallet>
 # Outputs JSON to stdout, status messages to stderr
 
 NETWORK_CONFIG() {
@@ -25,13 +25,14 @@ NETWORK_CONFIG() {
 
 show_help() {
     cat >&2 << 'EOF'
-Usage: execute-contract.sh [options] <contract-address> <execute-msg> <wallet>
+Usage: migrate-contract.sh [options] <contract-address> <new-code-id> <migrate-msg> <wallet>
 
-Execute a message on an instantiated WASM contract.
+Migrate a contract instance to a new code version.
 
 Arguments:
-  <contract-address>  Contract address to execute
-  <execute-msg>       JSON execute message
+  <contract-address>  Contract address to migrate
+  <new-code-id>       New code ID to migrate to
+  <migrate-msg>       JSON migration message
   <wallet>            Wallet name or address to sign the transaction
 
 Options:
@@ -45,9 +46,9 @@ Environment:
   XION_NETWORK           Default network (testnet, mainnet, local)
 
 Examples:
-  execute-contract.sh xion1... '{"increment":{}}' mywallet
-  execute-contract.sh --network mainnet xion1... '{"increment":{}}' mywallet
-  XION_NETWORK=local execute-contract.sh xion1... '{"increment":{}}' mywallet
+  migrate-contract.sh xion1... 2 '{}' mywallet
+  migrate-contract.sh --network mainnet xion1... 2 '{}' mywallet
+  XION_NETWORK=local migrate-contract.sh xion1... 2 '{}' mywallet
 EOF
 }
 
@@ -97,14 +98,15 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}"
 
-if [[ $# -lt 3 ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Usage: execute-contract.sh [options] <contract-address> <execute-msg> <wallet>. Use --help for details."}' emit_json
+if [[ $# -lt 4 ]]; then
+    PAYLOAD_JSON='{"success":false,"error":"Usage: migrate-contract.sh [options] <contract-address> <new-code-id> <migrate-msg> <wallet>. Use --help for details."}' emit_json
     exit 1
 fi
 
 CONTRACT="$1"
-EXECUTE_MSG="$2"
-WALLET="$3"
+NEW_CODE_ID="$2"
+MIGRATE_MSG="$3"
+WALLET="$4"
 
 if ! CONFIG=$(NETWORK_CONFIG "$NETWORK" 2>/dev/null); then
     PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
@@ -120,14 +122,14 @@ read -r DEFAULT_CHAIN_ID DEFAULT_NODE_URL <<< "$CONFIG"
 CHAIN_ID="${CHAIN_ID:-$DEFAULT_CHAIN_ID}"
 NODE_URL="${NODE_URL:-$DEFAULT_NODE_URL}"
 
-if ! echo "$EXECUTE_MSG" | python3 -m json.tool &> /dev/null; then
-    PAYLOAD_JSON='{"success":false,"error":"execute-msg must be valid JSON"}' emit_json
+if ! echo "$MIGRATE_MSG" | python3 -m json.tool &> /dev/null; then
+    PAYLOAD_JSON='{"success":false,"error":"migrate-msg must be valid JSON"}' emit_json
     exit 1
 fi
 
-echo "Executing contract $CONTRACT on $NETWORK..." >&2
+echo "Migrating contract $CONTRACT to code ID $NEW_CODE_ID on $NETWORK..." >&2
 
-if ! RESULT=$(xiond tx wasm execute "$CONTRACT" "$EXECUTE_MSG" \
+if ! RESULT=$(xiond tx wasm migrate "$CONTRACT" "$NEW_CODE_ID" "$MIGRATE_MSG" \
     --from "$WALLET" \
     --gas-prices 0.025uxion \
     --gas auto \
@@ -139,7 +141,7 @@ if ! RESULT=$(xiond tx wasm execute "$CONTRACT" "$EXECUTE_MSG" \
     PAYLOAD_JSON="$(ERR_MSG="$RESULT" python3 - <<'PY'
 import json, os
 err = os.environ.get("ERR_MSG", "")
-print(json.dumps({"success": False, "error": f"Execution failed: {err}"}))
+print(json.dumps({"success": False, "error": f"Migration failed: {err}"}))
 PY
 )" emit_json
     exit 1
@@ -158,18 +160,19 @@ PY
 )"
 
 if [[ -z "$TXHASH" ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Execution may have succeeded but failed to parse txhash"}' emit_json
+    PAYLOAD_JSON='{"success":false,"error":"Migration may have succeeded but failed to parse txhash"}' emit_json
     exit 1
 fi
 
-PAYLOAD_JSON="$(TXHASH="$TXHASH" CONTRACT="$CONTRACT" NETWORK="$NETWORK" python3 - <<'PY'
+PAYLOAD_JSON="$(TXHASH="$TXHASH" CONTRACT="$CONTRACT" NEW_CODE_ID="$NEW_CODE_ID" NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
 print(json.dumps({
     "success": True,
     "network": os.environ["NETWORK"],
     "txhash": os.environ["TXHASH"],
     "contract": os.environ["CONTRACT"],
-    "message": "Transaction executed successfully",
+    "new_code_id": os.environ["NEW_CODE_ID"],
+    "message": "Contract migrated successfully"
 }))
 PY
 )" emit_json

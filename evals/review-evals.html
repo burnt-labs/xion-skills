@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xion Skills Trigger Eval Review</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 10px; }
+        .description { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .description strong { color: #0066cc; }
+        .skill-section { background: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .skill-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; cursor: pointer; }
+        .skill-header h2 { margin-bottom: 5px; }
+        .skill-header .stats { font-size: 14px; opacity: 0.9; }
+        .skill-content { padding: 20px; display: none; }
+        .skill-content.active { display: block; }
+        .eval-item { display: flex; align-items: flex-start; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; }
+        .eval-item:last-child { border-bottom: none; }
+        .eval-item:hover { background: #f9f9f9; }
+        .eval-num { background: #667eea; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+        .eval-content { flex: 1; }
+        .eval-query { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 8px; resize: vertical; min-height: 60px; }
+        .eval-toggle { display: flex; align-items: center; gap: 10px; }
+        .toggle-label { font-size: 13px; color: #666; }
+        .toggle-switch { position: relative; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4CAF50; }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .status-trigger { color: #4CAF50; font-weight: bold; }
+        .status-no-trigger { color: #f44336; font-weight: bold; }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-export { background: #4CAF50; color: white; }
+        .btn-delete { background: #f44336; color: white; padding: 8px 16px; }
+        .add-eval { margin-top: 15px; }
+        .legend { display: flex; gap: 20px; margin-bottom: 15px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .legend-dot.green { background: #4CAF50; }
+        .legend-dot.red { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Xion Skills Trigger Eval Review</h1>
+        <div class="description">
+            <strong>Instructions:</strong> Review each query and verify the <code>should_trigger</code> setting is correct.
+            <br>• <span class="status-trigger">✓ Should Trigger</span> = The skill SHOULD be invoked for this query
+            <br>• <span class="status-no-trigger">✗ Should NOT Trigger</span> = The skill should NOT be invoked (use a different skill or none)
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot green"></div> Should Trigger</div>
+            <div class="legend-item"><div class="legend-dot red"></div> Should NOT Trigger</div>
+        </div>
+
+        <!-- xiond-init -->
+        <div class="skill-section" id="section-xiond-init">
+            <div class="skill-header" onclick="toggleSection('xiond-init')">
+                <h2>xiond-init</h2>
+                <div class="stats" id="stats-xiond-init"></div>
+                <div class="description" style="margin-top:10px; background:rgba(255,255,255,0.2); color:white;">
+                    <strong>Current Description:</strong> Install, upgrade, and verify the `xiond` CLI for Xion blockchain. Use this proactively whenever the user mentions xiond installation, setup, initialization, configuration, environment setup, or encounters "xiond: command not found". Also use when checking xiond version or upgrading to latest version.
+                </div>
+            </div>
+            <div class="skill-content" id="content-xiond-init"></div>
+        </div>
+
+        <!-- xiond-usage -->
+        <div class="skill-section" id="section-xiond-usage">
+            <div class="skill-header" onclick="toggleSection('xiond-usage')">
+                <h2>xiond-usage</h2>
+                <div class="stats" id="stats-xiond-usage"></div>
+                <div class="description" style="margin-top:10px; background:rgba(255,255,255,0.2); color:white;">
+                    <strong>Current Description:</strong> Day-to-day Xion account operations using `xiond` CLI. Use this proactively whenever the user mentions wallet, key, account, address, balance, transfer, send tokens, transaction, faucet, or any account management task.
+                </div>
+            </div>
+            <div class="skill-content" id="content-xiond-usage"></div>
+        </div>
+
+        <!-- xiond-wasm -->
+        <div class="skill-section" id="section-xiond-wasm">
+            <div class="skill-header" onclick="toggleSection('xiond-wasm')">
+                <h2>xiond-wasm</h2>
+                <div class="stats" id="stats-xiond-wasm"></div>
+                <div class="description" style="margin-top:10px; background:rgba(255,255,255,0.2); color:white;">
+                    <strong>Current Description:</strong> Deploy, interact with, and manage CosmWasm smart contracts on Xion using `xiond`. Use this proactively whenever the user mentions smart contracts, WASM, CosmWasm, contract deployment, Code ID, instantiate, execute, query contract, migrate contract, or any blockchain contract interaction.
+                </div>
+            </div>
+            <div class="skill-content" id="content-xiond-wasm"></div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-export" onclick="exportAll()">📦 Export All Eval Sets</button>
+            <button class="btn btn-secondary" onclick="expandAll()">▼ Expand All</button>
+            <button class="btn btn-secondary" onclick="collapseAll()">▲ Collapse All</button>
+        </div>
+    </div>
+
+    <script>
+        const evalsData = {
+            'xiond-init': [
+                {"query": "I keep getting 'xiond: command not found' when I try to run xiond. Can you help?", "should_trigger": true},
+                {"query": "How do I install xiond on my MacBook?", "should_trigger": true},
+                {"query": "I need to set up my Xion development environment", "should_trigger": true},
+                {"query": "What version of xiond do I have installed?", "should_trigger": true},
+                {"query": "Can you check if xiond is installed on my system?", "should_trigger": true},
+                {"query": "I want to upgrade xiond to the latest version", "should_trigger": true},
+                {"query": "Help me initialize xiond on Ubuntu", "should_trigger": true},
+                {"query": "xiond setup on Linux - I'm stuck", "should_trigger": true},
+                {"query": "Configure xiond CLI for the first time", "should_trigger": true},
+                {"query": "I'm getting started with Xion and need to install the CLI tools", "should_trigger": true},
+                {"query": "Create a new wallet for me", "should_trigger": false},
+                {"query": "Send 1000 uxion to xion1abc123", "should_trigger": false},
+                {"query": "What's my account balance?", "should_trigger": false},
+                {"query": "Deploy a smart contract to Xion", "should_trigger": false},
+                {"query": "I want to upload a CosmWasm contract", "should_trigger": false},
+                {"query": "Query my contract state", "should_trigger": false},
+                {"query": "How do I use xiond to send tokens?", "should_trigger": false},
+                {"query": "Instantiate a contract with code ID 123", "should_trigger": false},
+                {"query": "List all my keys in the keyring", "should_trigger": false},
+                {"query": "Migrate my contract to a new version", "should_trigger": false}
+            ],
+            'xiond-usage': [
+                {"query": "Create a new wallet called my-main-wallet", "should_trigger": true},
+                {"query": "I need to set up a new Xion account", "should_trigger": true},
+                {"query": "What's the address of my key 'dev-wallet'?", "should_trigger": true},
+                {"query": "Show me my wallet details for 'alice'", "should_trigger": true},
+                {"query": "List all my accounts/keys", "should_trigger": true},
+                {"query": "I have a 24-word mnemonic. Help me restore my wallet as 'recovered'", "should_trigger": true},
+                {"query": "Recover my account from seed phrase", "should_trigger": true},
+                {"query": "Send 5000 uxion from my-wallet to xion1def456...", "should_trigger": true},
+                {"query": "Transfer some tokens to another address", "should_trigger": true},
+                {"query": "Check the balance of xion1abc123...", "should_trigger": true},
+                {"query": "How much XION do I have in my account?", "should_trigger": true},
+                {"query": "What's the status of transaction 0xABC123?", "should_trigger": true},
+                {"query": "Check if my tx went through - hash is DEF456GHI789", "should_trigger": true},
+                {"query": "Get me some testnet tokens from the faucet", "should_trigger": true},
+                {"query": "What's the current block height on Xion testnet?", "should_trigger": true},
+                {"query": "Install xiond on my computer", "should_trigger": false},
+                {"query": "I'm getting 'xiond: command not found'", "should_trigger": false},
+                {"query": "Upgrade xiond to latest version", "should_trigger": false},
+                {"query": "Deploy my CosmWasm smart contract", "should_trigger": false},
+                {"query": "Upload the WASM file to the chain", "should_trigger": false},
+                {"query": "Instantiate contract with code ID 456", "should_trigger": false},
+                {"query": "Execute the increment function on my counter contract", "should_trigger": false},
+                {"query": "Query my contract at xion1contract... with {\"get_count\":{}}", "should_trigger": false},
+                {"query": "Migrate my contract to a new code version", "should_trigger": false},
+                {"query": "Optimize my Rust contract for deployment", "should_trigger": false}
+            ],
+            'xiond-wasm': [
+                {"query": "Deploy my CosmWasm smart contract to Xion", "should_trigger": true},
+                {"query": "I have a Rust contract in ./my-cw-project. Help me optimize and upload it", "should_trigger": true},
+                {"query": "Optimize my contract for deployment", "should_trigger": true},
+                {"query": "Upload the WASM file artifacts/my_contract.wasm to the blockchain", "should_trigger": true},
+                {"query": "What Code ID did my contract upload get?", "should_trigger": true},
+                {"query": "List all uploaded contract codes on Xion", "should_trigger": true},
+                {"query": "Instantiate the contract with Code ID 123 using {\"count\": 0} as init message", "should_trigger": true},
+                {"query": "Create a new instance of my counter contract", "should_trigger": true},
+                {"query": "Query the contract at xion1contract... with message {\"get_config\":{}}", "should_trigger": true},
+                {"query": "Get the state of my smart contract", "should_trigger": true},
+                {"query": "What's the Code ID and admin for contract xion1abc...?", "should_trigger": true},
+                {"query": "Execute the transfer function on my CW20 contract", "should_trigger": true},
+                {"query": "Call the increment method on my counter contract at xion1contract...", "should_trigger": true},
+                {"query": "Migrate my contract to Code ID 789", "should_trigger": true},
+                {"query": "Upgrade my smart contract to a new version while keeping the same address", "should_trigger": true},
+                {"query": "Install xiond on my Mac", "should_trigger": false},
+                {"query": "Check if xiond is installed and what version", "should_trigger": false},
+                {"query": "Create a new wallet called 'trading-bot'", "should_trigger": false},
+                {"query": "What's my account address for key 'main-wallet'?", "should_trigger": false},
+                {"query": "Send 10000 uxion to xion1recipient...", "should_trigger": false},
+                {"query": "Check my token balance", "should_trigger": false},
+                {"query": "Restore my wallet from mnemonic phrase", "should_trigger": false},
+                {"query": "List all my keys in the keyring", "should_trigger": false},
+                {"query": "What's the status of transaction ABC123?", "should_trigger": false},
+                {"query": "Get me testnet tokens from the faucet", "should_trigger": false}
+            ]
+        };
+
+        function toggleSection(skillName) {
+            const content = document.getElementById(`content-${skillName}`);
+            content.classList.toggle('active');
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.skill-content').forEach(el => el.classList.add('active'));
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.skill-content').forEach(el => el.classList.remove('active'));
+        }
+
+        function updateStats(skillName) {
+            const evals = evalsData[skillName];
+            const triggerCount = evals.filter(e => e.should_trigger).length;
+            const noTriggerCount = evals.length - triggerCount;
+            document.getElementById(`stats-${skillName}`).textContent = 
+                `${triggerCount} should trigger · ${noTriggerCount} should NOT trigger · ${evals.length} total`;
+        }
+
+        function renderEvals(skillName) {
+            const container = document.getElementById(`content-${skillName}`);
+            const evals = evalsData[skillName];
+            
+            let html = '';
+            evals.forEach((eval, index) => {
+                html += `
+                    <div class="eval-item" id="eval-${skillName}-${index}">
+                        <div class="eval-num">${index + 1}</div>
+                        <div class="eval-content">
+                            <textarea class="eval-query" onchange="updateQuery('${skillName}', ${index}, this.value)">${eval.query}</textarea>
+                            <div class="eval-toggle">
+                                <span class="toggle-label ${eval.should_trigger ? 'status-trigger' : 'status-no-trigger'}" id="label-${skillName}-${index}">
+                                    ${eval.should_trigger ? '✓ Should Trigger' : '✗ Should NOT Trigger'}
+                                </span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${eval.should_trigger ? 'checked' : ''} onchange="updateTrigger('${skillName}', ${index}, this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <button class="btn btn-delete" onclick="deleteEval('${skillName}', ${index})">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="add-eval">
+                    <button class="btn btn-secondary" onclick="addEval('${skillName}', true)">+ Add Should Trigger</button>
+                    <button class="btn btn-secondary" onclick="addEval('${skillName}', false)">+ Add Should NOT Trigger</button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            updateStats(skillName);
+        }
+
+        function updateQuery(skillName, index, value) {
+            evalsData[skillName][index].query = value;
+        }
+
+        function updateTrigger(skillName, index, value) {
+            evalsData[skillName][index].should_trigger = value;
+            document.getElementById(`label-${skillName}-${index}`).textContent = 
+                value ? '✓ Should Trigger' : '✗ Should NOT Trigger';
+            document.getElementById(`label-${skillName}-${index}`).className = 
+                `toggle-label ${value ? 'status-trigger' : 'status-no-trigger'}`;
+            updateStats(skillName);
+        }
+
+        function addEval(skillName, shouldTrigger) {
+            evalsData[skillName].push({
+                query: "New query - edit me",
+                should_trigger: shouldTrigger
+            });
+            renderEvals(skillName);
+            updateStats(skillName);
+        }
+
+        function deleteEval(skillName, index) {
+            if (confirm('Delete this eval?')) {
+                evalsData[skillName].splice(index, 1);
+                renderEvals(skillName);
+                updateStats(skillName);
+            }
+        }
+
+        function exportAll() {
+            const skillNames = ['xiond-init', 'xiond-usage', 'xiond-wasm'];
+            skillNames.forEach(skillName => {
+                const dataStr = JSON.stringify(evalsData[skillName], null, 2);
+                const blob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${skillName}-trigger-eval.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const skillNames = ['xiond-init', 'xiond-usage', 'xiond-wasm'];
+            skillNames.forEach(skillName => {
+                renderEvals(skillName);
+            });
+        });
+    </script>
+</body>
+</html>

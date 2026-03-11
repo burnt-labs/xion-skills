@@ -1,0 +1,102 @@
+[
+  {
+    "query": "Deploy my CosmWasm smart contract to Xion",
+    "should_trigger": true
+  },
+  {
+    "query": "I have a Rust contract in ./my-cw-project. Help me optimize and upload it",
+    "should_trigger": true
+  },
+  {
+    "query": "Optimize my contract for deployment",
+    "should_trigger": true
+  },
+  {
+    "query": "Upload the WASM file artifacts/my_contract.wasm to the blockchain",
+    "should_trigger": true
+  },
+  {
+    "query": "What Code ID did my contract upload get?",
+    "should_trigger": true
+  },
+  {
+    "query": "List all uploaded contract codes on Xion",
+    "should_trigger": true
+  },
+  {
+    "query": "Instantiate the contract with Code ID 123 using {\"count\": 0} as init message",
+    "should_trigger": true
+  },
+  {
+    "query": "Create a new instance of my counter contract",
+    "should_trigger": true
+  },
+  {
+    "query": "Query the contract at xion1contract... with message {\"get_config\":{}}",
+    "should_trigger": true
+  },
+  {
+    "query": "Get the state of my smart contract",
+    "should_trigger": true
+  },
+  {
+    "query": "What's the Code ID and admin for contract xion1abc...?",
+    "should_trigger": true
+  },
+  {
+    "query": "Execute the transfer function on my CW20 contract",
+    "should_trigger": true
+  },
+  {
+    "query": "Call the increment method on my counter contract at xion1contract...",
+    "should_trigger": true
+  },
+  {
+    "query": "Migrate my contract to Code ID 789",
+    "should_trigger": true
+  },
+  {
+    "query": "Upgrade my smart contract to a new version while keeping the same address",
+    "should_trigger": true
+  },
+  {
+    "query": "Install xiond on my Mac",
+    "should_trigger": false
+  },
+  {
+    "query": "Check if xiond is installed and what version",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a new wallet called 'trading-bot'",
+    "should_trigger": false
+  },
+  {
+    "query": "What's my account address for key 'main-wallet'?",
+    "should_trigger": false
+  },
+  {
+    "query": "Send 10000 uxion to xion1recipient...",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my token balance",
+    "should_trigger": false
+  },
+  {
+    "query": "Restore my wallet from mnemonic phrase",
+    "should_trigger": false
+  },
+  {
+    "query": "List all my keys in the keyring",
+    "should_trigger": false
+  },
+  {
+    "query": "What's the status of transaction ABC123?",
+    "should_trigger": false
+  },
+  {
+    "query": "Get me testnet tokens from the faucet",
+    "should_trigger": false
+  }
+]

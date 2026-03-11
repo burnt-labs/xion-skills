@@ -16,7 +16,7 @@ Provides scripts for deploying and interacting with CosmWasm smart contracts on 
 - Requires `bash` and `python3`
 - Optimization requires Docker running locally
 - Scripts print **machine-readable JSON to stdout** and progress/errors to stderr
-- Supports testnet, mainnet, and local network configurations
+- Supports testnet and mainnet configurations
 
 ## Network Selection
 
@@ -30,9 +30,6 @@ bash script.sh --network testnet
 
 # Use mainnet  
 bash script.sh --network mainnet
-
-# Use local development node
-bash script.sh --network local
 ```
 
 ### Using environment variable
@@ -48,7 +45,6 @@ bash script.sh
 |---------|----------|--------------|
 | testnet | `xion-testnet-2` | `https://rpc.xion-testnet-2.burnt.com:443` |
 | mainnet | `xion-mainnet-1` | `https://rpc.xion-mainnet-1.burnt.com` |
-| local | `xion-local` | `http://localhost:26657` |
 
 ## How It Works
 
@@ -80,7 +76,7 @@ bash /mnt/skills/user/xiond-wasm/scripts/optimize-contract.sh ./cw-counter
 ### Upload Contract
 
 ```bash
-bash /mnt/skills/user/xiond-wasm/scripts/upload-contract.sh <wasm-file> <wallet> [--network testnet|mainnet|local]
+bash /mnt/skills/user/xiond-wasm/scripts/upload-contract.sh <wasm-file> <wallet> [--network testnet|mainnet]
 ```
 
 **Arguments:**

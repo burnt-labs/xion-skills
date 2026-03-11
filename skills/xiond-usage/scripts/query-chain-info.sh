@@ -9,7 +9,6 @@ NETWORK_URLS() {
     case "$1" in
         testnet) echo "https://rpc.xion-testnet-2.burnt.com:443" ;;
         mainnet) echo "https://rpc.xion-mainnet-1.burnt.com" ;;
-        local)   echo "http://localhost:26657" ;;
         *)       echo "" ;;
     esac
 }
@@ -21,7 +20,7 @@ Usage: query-chain-info.sh [options] [node-url]
 Query XION chain status and information.
 
 Options:
-  --network <network>  Network to query: testnet, mainnet, or local
+  --network <network>  Network to query: testnet or mainnet
                        (default: testnet or XION_NETWORK env var)
   --help               Show this help message
 
@@ -34,7 +33,6 @@ Environment:
 Examples:
   query-chain-info.sh
   query-chain-info.sh --network mainnet
-  query-chain-info.sh --network local
   query-chain-info.sh https://rpc.xion-testnet-2.burnt.com:443
   XION_NETWORK=mainnet query-chain-info.sh
 EOF
@@ -87,7 +85,7 @@ fi
 if [[ -z "$NODE_URL" ]]; then
     NODE_URL=$(NETWORK_URLS "$NETWORK")
     if [[ -z "$NODE_URL" ]]; then
-        PAYLOAD_JSON="{\"success\":false,\"error\":\"Invalid network: $NETWORK. Use testnet, mainnet, or local.\"}" emit_json
+        PAYLOAD_JSON="{\"success\":false,\"error\":\"Invalid network: $NETWORK. Use testnet or mainnet.\"}" emit_json
         exit 1
     fi
 fi

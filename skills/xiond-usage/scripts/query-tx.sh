@@ -10,7 +10,6 @@ get_node_url() {
     case "$network" in
         testnet) echo "https://rpc.xion-testnet-2.burnt.com:443" ;;
         mainnet) echo "https://rpc.xion-mainnet-1.burnt.com" ;;
-        local)   echo "http://localhost:26657" ;;
         *)       echo "https://rpc.xion-testnet-2.burnt.com:443" ;;
     esac
 }
@@ -22,7 +21,7 @@ Usage: query-tx.sh [options] <txhash>
 Query transaction status by hash.
 
 Options:
-  --network <network>  Network to query: testnet, mainnet, or local
+  --network <network>  Network to query: testnet or mainnet
                        (default: testnet, or XION_NETWORK env var)
   --node-url <url>     Custom node URL (overrides --network)
   -h, --help           Show this help message
@@ -30,13 +29,12 @@ Options:
 Network endpoints:
   testnet: https://rpc.xion-testnet-2.burnt.com:443
   mainnet: https://rpc.xion-mainnet-1.burnt.com
-  local:   http://localhost:26657
 
 Examples:
   query-tx.sh ABC123...
   query-tx.sh --network mainnet ABC123...
   query-tx.sh --node-url https://custom-rpc.com ABC123...
-  XION_NETWORK=local query-tx.sh ABC123...
+  XION_NETWORK=mainnet query-tx.sh ABC123...
 EOF
 }
 
@@ -61,7 +59,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --network)
             if [[ -z "${2:-}" ]]; then
-                PAYLOAD_JSON='{"success":false,"error":"--network requires a value (testnet|mainnet|local)"}' emit_json
+                PAYLOAD_JSON='{"success":false,"error":"--network requires a value (testnet|mainnet)"}' emit_json
                 exit 1
             fi
             NETWORK="$2"

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Query account balance using xiond
-# Usage: query-balance.sh <address> [--network testnet|mainnet|local] [node-url]
+# Usage: query-balance.sh <address> [--network testnet|mainnet] [node-url]
 # Outputs JSON to stdout, status messages to stderr
 
 emit_json() {
@@ -22,9 +22,6 @@ get_network_config() {
             ;;
         mainnet|main|prod)
             echo "https://rpc.xion-mainnet-1.burnt.com"
-            ;;
-        local|dev)
-            echo "http://localhost:26657"
             ;;
         *)
             echo ""
@@ -55,7 +52,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            PAYLOAD_JSON='{"success":false,"error":"Usage: query-balance.sh <address> [--network testnet|mainnet|local]","hint":"Or set XION_NETWORK environment variable"}' emit_json
+            PAYLOAD_JSON='{"success":false,"error":"Usage: query-balance.sh <address> [--network testnet|mainnet]","hint":"Or set XION_NETWORK environment variable"}' emit_json
             exit 1
             ;;
         *)
@@ -80,7 +77,7 @@ if [[ -z "$NODE_URL" ]]; then
     if [[ -z "$NODE_URL" ]]; then
         PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
-print(json.dumps({"success": False, "error": f"Unknown network: {os.environ['NETWORK']}. Use 'testnet', 'mainnet', or 'local'."}))
+print(json.dumps({"success": False, "error": f"Unknown network: {os.environ['NETWORK']}. Use 'testnet' or 'mainnet'."}))
 PY
 )" emit_json
         exit 1

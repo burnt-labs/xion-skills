@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Send tokens between accounts using xiond
-# Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local] [chain-id] [node-url]
+# Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet] [chain-id] [node-url]
 # Outputs JSON to stdout, status messages to stderr
 
 emit_json() {
@@ -22,9 +22,6 @@ get_network_config() {
             ;;
         mainnet|main|prod)
             echo "xion-mainnet-1 https://rpc.xion-mainnet-1.burnt.com"
-            ;;
-        local|dev)
-            echo "xion-local http://localhost:26657"
             ;;
         *)
             echo "" ""
@@ -58,7 +55,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local]","hint":"Or set XION_NETWORK environment variable"}' emit_json
+            PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet]","hint":"Or set XION_NETWORK environment variable"}' emit_json
             exit 1
             ;;
         *)
@@ -79,7 +76,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$FROM" ]] || [[ -z "$TO" ]] || [[ -z "$AMOUNT" ]]; then
-    PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet|local]"}' emit_json
+    PAYLOAD_JSON='{"success":false,"error":"Usage: send-tokens.sh <from> <to> <amount> [--network testnet|mainnet]"}' emit_json
     exit 1
 fi
 
@@ -89,7 +86,7 @@ if [[ -z "$CHAIN_ID" ]] || [[ -z "$NODE_URL" ]]; then
     if [[ -z "$NET_CONFIG" ]]; then
         PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
-print(json.dumps({"success": False, "error": f"Unknown network: {os.environ['NETWORK']}. Use 'testnet', 'mainnet', or 'local'."}))
+print(json.dumps({"success": False, "error": f"Unknown network: {os.environ['NETWORK']}. Use 'testnet' or 'mainnet'."}))
 PY
 )" emit_json
         exit 1

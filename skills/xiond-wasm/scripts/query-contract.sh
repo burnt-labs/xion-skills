@@ -14,9 +14,6 @@ NETWORK_CONFIG() {
         mainnet)
             echo "https://rpc.xion-mainnet-1.burnt.com"
             ;;
-        local)
-            echo "http://localhost:26657"
-            ;;
         *)
             return 1
             ;;
@@ -34,18 +31,17 @@ Arguments:
   <query-msg>         JSON query message
 
 Options:
-  --network <network>    Network to use: testnet, mainnet, or local
+  --network <network>    Network to use: testnet or mainnet
                          (default: testnet, or XION_NETWORK env var)
   --node-url <url>       RPC node URL (overrides network setting)
   --help                 Show this help message
 
 Environment:
-  XION_NETWORK           Default network (testnet, mainnet, local)
+  XION_NETWORK           Default network (testnet or mainnet)
 
 Examples:
   query-contract.sh xion1... '{"get_count":{}}'
   query-contract.sh --network mainnet xion1... '{"get_count":{}}'
-  XION_NETWORK=local query-contract.sh xion1... '{"get_count":{}}'
 EOF
 }
 
@@ -101,7 +97,7 @@ QUERY_MSG="$2"
 if ! DEFAULT_NODE_URL=$(NETWORK_CONFIG "$NETWORK" 2>/dev/null); then
     PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
-print(json.dumps({"success": False, "error": f"Invalid network '{os.environ['NETWORK']}'. Use: testnet, mainnet, or local"}))
+print(json.dumps({"success": False, "error": f"Invalid network '{os.environ['NETWORK']}'. Use: testnet or mainnet"}))
 PY
 )" emit_json
     exit 1

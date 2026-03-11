@@ -14,9 +14,6 @@ NETWORK_CONFIG() {
         mainnet)
             echo "xion-mainnet-1 https://rpc.xion-mainnet-1.burnt.com"
             ;;
-        local)
-            echo "xion-local http://localhost:26657"
-            ;;
         *)
             return 1
             ;;
@@ -34,19 +31,18 @@ Arguments:
   <wallet>       Wallet name or address to sign the transaction
 
 Options:
-  --network <network>    Network to use: testnet, mainnet, or local
+  --network <network>    Network to use: testnet or mainnet
                          (default: testnet, or XION_NETWORK env var)
   --chain-id <id>        Chain ID (overrides network setting)
   --node-url <url>       RPC node URL (overrides network setting)
   --help                 Show this help message
 
 Environment:
-  XION_NETWORK           Default network (testnet, mainnet, local)
+  XION_NETWORK           Default network (testnet or mainnet)
 
 Examples:
   upload-contract.sh contract.wasm mywallet
   upload-contract.sh --network mainnet contract.wasm mywallet
-  upload-contract.sh --network local contract.wasm mywallet
   XION_NETWORK=mainnet upload-contract.sh contract.wasm mywallet
 EOF
 }
@@ -108,7 +104,7 @@ WALLET="$2"
 if ! CONFIG=$(NETWORK_CONFIG "$NETWORK" 2>/dev/null); then
     PAYLOAD_JSON="$(NETWORK="$NETWORK" python3 - <<'PY'
 import json, os
-print(json.dumps({"success": False, "error": f"Invalid network '{os.environ['NETWORK']}'. Use: testnet, mainnet, or local"}))
+print(json.dumps({"success": False, "error": f"Invalid network '{os.environ['NETWORK']}'. Use: testnet or mainnet"}))
 PY
 )" emit_json
     exit 1

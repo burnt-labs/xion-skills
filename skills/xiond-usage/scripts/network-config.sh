@@ -11,10 +11,6 @@ XION_MAINNET_CHAIN_ID="xion-mainnet-1"
 XION_MAINNET_RPC="https://rpc.xion-mainnet-1.burnt.com"
 XION_MAINNET_API="https://api.xion-mainnet-1.burnt.com"
 
-XION_LOCAL_CHAIN_ID="xion-local"
-XION_LOCAL_RPC="http://localhost:26657"
-XION_LOCAL_API="http://localhost:1317"
-
 # Resolve network settings
 # Usage: resolve_network [network_name]
 # Sets: CHAIN_ID, NODE_URL
@@ -30,12 +26,8 @@ resolve_network() {
             CHAIN_ID="$XION_MAINNET_CHAIN_ID"
             NODE_URL="$XION_MAINNET_RPC"
             ;;
-        local|dev)
-            CHAIN_ID="$XION_LOCAL_CHAIN_ID"
-            NODE_URL="$XION_LOCAL_RPC"
-            ;;
         *)
-            echo "Unknown network: $network. Use 'testnet', 'mainnet', or 'local'." >&2
+            echo "Unknown network: $network. Use 'testnet' or 'mainnet'." >&2
             return 1
             ;;
     esac

@@ -37,16 +37,6 @@ This document provides the network configuration for Xion testnet and mainnet.
 
 **Explorer:** https://explorer.burnt.com/xion-mainnet
 
-## Local Development
-
-For local development with a local node:
-
-| Endpoint Type | URL |
-|--------------|-----|
-| RPC | `http://localhost:26657` |
-| API/REST | `http://localhost:1317` |
-| gRPC | `localhost:9090` |
-
 ## Using Network Configuration in Scripts
 
 All scripts support specifying the network in multiple ways:
@@ -59,9 +49,6 @@ bash script.sh --network testnet
 
 # Use mainnet
 bash script.sh --network mainnet
-
-# Use local node
-bash script.sh --network local
 ```
 
 ### Method 2: Environment Variable

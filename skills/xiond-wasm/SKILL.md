@@ -1,11 +1,38 @@
 ---
 name: xiond-wasm
-description: Deploy, interact with, and manage CosmWasm smart contracts on Xion using `xiond`. Use this proactively whenever the user mentions smart contracts, WASM, CosmWasm, contract deployment, Code ID, instantiate, execute, query contract, migrate contract, upgrade contract, or any blockchain contract interaction. Covers the full contract lifecycle: optimize → upload → instantiate → query/execute → migrate/upgrade. Also use for listing uploaded codes and querying contract metadata.
+version: 1.0.0
+description: |
+  Deploy and manage CosmWasm smart contracts on Xion using `xiond`.
+  
+  This is the PRIMARY tool for contract developers. Covers the full lifecycle:
+  optimize → upload → instantiate → query/execute → migrate.
+  
+  Triggers: CosmWasm, 合约部署, contract deployment, wasm, Code ID,
+  instantiate, execute contract, migrate contract, 合约迁移, 智能合约,
+  smart contract, cw contract, wasm upload, wasm instantiate.
 ---
 
 # Xiond WASM Contract Operations
 
 Provides scripts for deploying and interacting with CosmWasm smart contracts on the Xion blockchain. Covers the complete contract lifecycle from optimization through migration.
+
+## Contract Developer Focus
+
+This skill is specifically designed for CosmWasm contract developers:
+
+1. **Optimize** - Prepare contract bytecode
+2. **Upload** - Store code on chain
+3. **Instantiate** - Create contract instances
+4. **Execute/Query** - Interact with contracts
+5. **Migrate** - Upgrade contract logic
+
+## Integration with xion-toolkit
+
+After deploying contracts, you can use xion-toolkit's Treasury to:
+- Fund contract operations gaslessly
+- Configure authz grants for contract interactions
+
+For more information, see [xion-toolkit](https://github.com/burnt-labs/xion-agent-toolkit).
 
 ## Prerequisites
 

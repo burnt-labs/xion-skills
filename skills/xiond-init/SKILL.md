@@ -1,13 +1,36 @@
 ---
 name: xiond-init
-description: Install, upgrade, and verify the `xiond` CLI for Xion blockchain. Use this proactively whenever the user mentions xiond installation, setup, initialization, configuration, environment setup, or encounters "xiond: command not found". Also use when checking xiond version or upgrading to latest version. This skill handles macOS, Debian/Ubuntu, Red Hat/CentOS/Fedora, and Alpine Linux.
+version: 1.0.0
+description: |
+  Install, upgrade, and verify the `xiond` CLI for Xion blockchain.
+  
+  Use when user specifically mentions xiond, contract development environment,
+  validator setup, or needs the traditional Cosmos SDK CLI.
+  
+  For most Xion developers, xion-toolkit (MetaAccount) is recommended instead.
+  
+  Triggers: xiond, xiond install, contract development, validator, cosmos CLI,
+  traditional wallet, mnemonic-based, xiond setup, xiond version, xiond upgrade.
 ---
 
 # Xiond Installation & Management
 
 Installs, upgrades, and manages the `xiond` command-line interface for interacting with the Xion blockchain. Cross-platform support for major operating systems.
 
-## When to Use
+## When to Use xiond vs xion-toolkit
+
+| Scenario | Recommended Tool |
+|----------|------------------|
+| Regular development | xion-toolkit (MetaAccount) |
+| Gasless transactions | xion-toolkit |
+| Contract deployment | xiond (this skill) |
+| Chain queries | xiond (this skill) |
+| Validator operations | xiond (this skill) |
+| Mnemonic-based wallets | xiond (this skill) |
+
+**Note**: For most Xion developers building applications with MetaAccount, OAuth2 authentication, or gasless transactions, use [xion-toolkit](https://github.com/burnt-labs/xion-agent-toolkit) instead.
+
+## When to Use This Skill
 
 - User needs to install xiond for the first time
 - User wants to check if xiond is installed and its version

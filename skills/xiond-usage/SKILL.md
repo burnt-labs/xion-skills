@@ -1,11 +1,48 @@
 ---
 name: xiond-usage
-description: Day-to-day Xion account operations using `xiond` CLI. Use this proactively whenever the user mentions wallet, key, account, address, balance, transfer, send tokens, transaction, faucet, seed phrase, mnemonic, recover account, or any account management task. Also use for listing accounts, restoring wallets from mnemonic, checking transaction status, querying txhash, or chain information. Covers create/show/list/restore keys, send/query tokens, check balances, and chain status queries.
+version: 1.0.0
+description: |
+  Chain queries and traditional wallet operations using `xiond` CLI.
+  
+  PRIMARY USE CASES:
+  - Chain/block queries (primary strength)
+  - Transaction status queries
+  - Balance queries (any address)
+  - Mnemonic-based wallet management
+  
+  For gasless transactions and Treasury operations, use xion-toolkit instead.
+  
+  Triggers: 链上查询, chain query, 交易查询, tx status, block query,
+  balance query, mnemonic, 传统钱包, cosmos wallet, xiond query, xiond tx,
+  xion account, xion wallet, xion balance, transaction lookup.
 ---
 
 # Xiond Usage Guide
 
 Provides scripts and guidance for common xiond CLI operations including account management, token transfers, balance queries, transaction tracking, and chain status.
+
+## Query Capabilities
+
+This skill excels at chain queries:
+
+| Query Type | Command |
+|------------|---------|
+| Block info | `query-chain-info.sh` |
+| Transaction | `query-tx.sh <txhash>` |
+| Balance | `query-balance.sh <address>` |
+| Account list | `list-accounts.sh` |
+
+## When to Use xiond vs xion-toolkit
+
+| Scenario | Recommended Tool |
+|----------|------------------|
+| Gasless transactions | xion-toolkit |
+| Treasury operations | xion-toolkit |
+| Chain queries | xiond (this skill) |
+| Transaction queries | xiond (this skill) |
+| Mnemonic wallet | xiond (this skill) |
+
+**Note**: For MetaAccount-based development with gasless transactions and OAuth2 authentication, use [xion-toolkit](https://github.com/burnt-labs/xion-agent-toolkit).
 
 ## Prerequisites
 

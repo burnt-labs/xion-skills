@@ -4,6 +4,19 @@ A collection of skills for AI Coding Agents to work with the Xion blockchain. Th
 
 Skills follow the [Agent Skills](https://agentskills.io/) format.
 
+## Relationship with xion-toolkit
+
+**xion-skills** provides `xiond` CLI skills for advanced scenarios:
+
+| Use xion-skills when... | Use xion-toolkit when... |
+|------------------------|--------------------------|
+| Deploying CosmWasm contracts | Building apps with MetaAccount |
+| Querying chain data | Managing Treasury contracts |
+| Validator operations | Gasless transactions |
+| Mnemonic-based wallets | OAuth2 authentication |
+
+**For most Xion developers, start with [xion-toolkit](https://github.com/burnt-labs/xion-agent-toolkit).**
+
 ## Overview
 
 This repository contains skills that enable AI assistants to:
@@ -36,6 +49,7 @@ cp -r skills/* ~/.claude/skills/
 cp -r skills/xiond-init ~/.claude/skills/
 cp -r skills/xiond-usage ~/.claude/skills/
 cp -r skills/xiond-wasm ~/.claude/skills/
+cp -r skills/xion-toolkit-bridge ~/.claude/skills/
 ```
 
 ### For claude.ai

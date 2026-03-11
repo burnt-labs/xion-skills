@@ -1,6 +1,6 @@
 ---
 name: xiond-wasm
-description: Deploy and interact with CosmWasm smart contracts on Xion. Use when user needs to optimize, upload, instantiate, query, or execute smart contracts.
+description: Deploy and interact with CosmWasm contracts on Xion via `xiond` (optimize → upload → instantiate → query/execute). Use this whenever the user mentions CosmWasm/WASM contracts, contract deployment, Code ID, instantiation, or needs help forming/querying JSON messages for smart contracts.
 ---
 
 # Xiond WASM Contract Operations
@@ -10,6 +10,12 @@ Provides scripts for deploying and interacting with CosmWasm smart contracts on 
 ## Prerequisites
 
 **xiond must be installed before using this skill.** If `xiond` is not found in your environment, please use the `xiond-init` skill to install it first.
+
+## Compatibility
+
+- Requires `bash` and `python3`
+- Optimization requires Docker running locally
+- Scripts print **machine-readable JSON to stdout** and progress/errors to stderr
 
 ## How It Works
 
@@ -220,3 +226,7 @@ All scripts output JSON to stdout:
 - Docker installed and running (for optimization)
 - Funded wallet account
 - CosmWasm contract source code (for optimization)
+
+## References
+
+- `references/contract-guide.md` (end-to-end deployment walkthrough and troubleshooting)

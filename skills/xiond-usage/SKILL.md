@@ -1,6 +1,6 @@
 ---
 name: xiond-usage
-description: Guide for using xiond CLI for account management, transactions, and queries. Use when user needs to create accounts, send tokens, query balances, or configure chain connections.
+description: Use `xiond` for day-to-day Xion account ops (create/show keys, send tokens, query balances) with ready-to-run scripts. Use this whenever the user asks to create a wallet/key, find an address, send XION/uxion, check balances, or troubleshoot basic CLI flags (chain-id/node/gas).
 ---
 
 # Xiond Usage Guide
@@ -10,6 +10,12 @@ Provides scripts and guidance for common xiond CLI operations including account 
 ## Prerequisites
 
 **xiond must be installed before using this skill.** If `xiond` is not found in your environment, please use the `xiond-init` skill to install it first.
+
+## Compatibility
+
+- Requires `bash` and `python3`
+- Scripts print **machine-readable JSON to stdout** and progress/errors to stderr
+- Defaults target Xion testnet (`xion-testnet-2`) unless you override `chain-id` / `node-url`
 
 ## How It Works
 
@@ -171,3 +177,7 @@ All scripts output JSON to stdout:
 - Find chain IDs and RPC endpoints at: https://docs.burnt.com/xion/developers/section-overview/public-endpoints-and-resources
 - Testnet: `xion-testnet-2`, `https://rpc.xion-testnet-2.burnt.com:443`
 - Mainnet: Check documentation for current mainnet endpoints
+
+## References
+
+- `references/xiond-guide.md` (deeper CLI notes, gas flags, endpoints)

@@ -1,8 +1,16 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Detect OS and install xiond
 # Outputs JSON to stdout, status messages to stderr
+
+emit_json() {
+    python3 - <<'PY'
+import json, os
+payload = json.loads(os.environ["PAYLOAD_JSON"])
+print(json.dumps(payload, ensure_ascii=False))
+PY
+}
 
 detect_os() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -133,7 +141,17 @@ OS=$(detect_os)
 VERSION=$(check_installed)
 
 if [[ -n "$VERSION" ]]; then
-    echo "{\"success\": true, \"os\": \"$OS\", \"installed\": true, \"version\": \"$VERSION\", \"message\": \"xiond is already installed\"}"
+    PAYLOAD_JSON="$(OS="$OS" VERSION="$VERSION" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": True,
+    "os": os.environ["OS"],
+    "installed": True,
+    "version": os.environ.get("VERSION", ""),
+    "message": "xiond is already installed",
+}))
+PY
+)" emit_json
     exit 0
 fi
 
@@ -177,12 +195,42 @@ esac
 if [[ "$INSTALL_SUCCESS" == "true" ]]; then
     NEW_VERSION=$(check_installed)
     if [[ -n "$NEW_VERSION" ]]; then
-        echo "{\"success\": true, \"os\": \"$OS\", \"installed\": false, \"version\": \"$NEW_VERSION\", \"message\": \"xiond installed successfully\"}"
+        PAYLOAD_JSON="$(OS="$OS" VERSION="$NEW_VERSION" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": True,
+    "os": os.environ["OS"],
+    "installed": False,
+    "version": os.environ.get("VERSION", ""),
+    "message": "xiond installed successfully",
+}))
+PY
+)" emit_json
     else
-        echo "{\"success\": false, \"os\": \"$OS\", \"installed\": false, \"version\": \"\", \"message\": \"Installation completed but xiond version check failed\"}"
+        PAYLOAD_JSON="$(OS="$OS" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": False,
+    "os": os.environ["OS"],
+    "installed": False,
+    "version": "",
+    "message": "Installation completed but xiond version check failed",
+}))
+PY
+)" emit_json
         exit 1
     fi
 else
-    echo "{\"success\": false, \"os\": \"$OS\", \"installed\": false, \"version\": \"\", \"message\": \"$INSTALL_ERROR\"}"
+    PAYLOAD_JSON="$(OS="$OS" ERR="$INSTALL_ERROR" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": False,
+    "os": os.environ["OS"],
+    "installed": False,
+    "version": "",
+    "message": os.environ.get("ERR", ""),
+}))
+PY
+)" emit_json
     exit 1
 fi

@@ -1,18 +1,26 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Instantiate an uploaded contract
 # Usage: instantiate-contract.sh <code-id> <label> <init-msg> <wallet> [chain-id] [node-url]
 # Outputs JSON to stdout, status messages to stderr
 
+emit_json() {
+    python3 - <<'PY'
+import json, os
+payload = json.loads(os.environ["PAYLOAD_JSON"])
+print(json.dumps(payload, ensure_ascii=False))
+PY
+}
+
 # Check if xiond is installed
 if ! command -v xiond &> /dev/null; then
-    echo "{\"success\": false, \"error\": \"xiond command not found. Please use the xiond-init skill to install xiond first.\"}"
+    PAYLOAD_JSON='{"success":false,"error":"xiond command not found. Please use the xiond-init skill to install xiond first."}' emit_json
     exit 1
 fi
 
 if [[ $# -lt 4 ]]; then
-    echo "{\"success\": false, \"error\": \"Usage: instantiate-contract.sh <code-id> <label> <init-msg> <wallet> [chain-id] [node-url]\"}"
+    PAYLOAD_JSON='{"success":false,"error":"Usage: instantiate-contract.sh <code-id> <label> <init-msg> <wallet> [chain-id] [node-url]"}' emit_json
     exit 1
 fi
 
@@ -24,15 +32,15 @@ CHAIN_ID="${5:-xion-testnet-2}"
 NODE_URL="${6:-https://rpc.xion-testnet-2.burnt.com:443}"
 
 # Validate JSON format
-if ! echo "$INIT_MSG" | python3 -m json.tool &> /dev/null && ! echo "$INIT_MSG" | jq . &> /dev/null; then
-    echo "{\"success\": false, \"error\": \"init-msg must be valid JSON\"}"
+if ! echo "$INIT_MSG" | python3 -m json.tool &> /dev/null; then
+    PAYLOAD_JSON='{"success":false,"error":"init-msg must be valid JSON"}' emit_json
     exit 1
 fi
 
 echo "Instantiating contract with Code ID $CODE_ID..." >&2
 
 # Instantiate the contract
-RESULT=$(xiond tx wasm instantiate "$CODE_ID" "$INIT_MSG" \
+if ! RESULT=$(xiond tx wasm instantiate "$CODE_ID" "$INIT_MSG" \
     --from "$WALLET" \
     --label "$LABEL" \
     --gas-prices 0.025uxion \
@@ -42,46 +50,91 @@ RESULT=$(xiond tx wasm instantiate "$CODE_ID" "$INIT_MSG" \
     --no-admin \
     --chain-id "$CHAIN_ID" \
     --node "$NODE_URL" \
-    --output json 2>&1)
-
-if [[ $? -ne 0 ]]; then
-    echo "{\"success\": false, \"error\": \"Instantiation failed: $RESULT\"}"
+    --output json 2>&1); then
+    PAYLOAD_JSON="$(ERR_MSG="$RESULT" python3 - <<'PY'
+import json, os
+err = os.environ.get("ERR_MSG", "")
+print(json.dumps({"success": False, "error": f"Instantiation failed: {err}"}))
+PY
+)" emit_json
     exit 1
 fi
 
-# Extract txhash
-TXHASH=$(echo "$RESULT" | grep -o '"txhash":"[^"]*"' | cut -d'"' -f4 || echo "")
+TXHASH="$(RAW="$RESULT" python3 - <<'PY'
+import json, os
+raw = os.environ.get("RAW", "")
+try:
+    data = json.loads(raw)
+except Exception:
+    print("")
+else:
+    print(data.get("txhash", "") or "")
+PY
+)"
 
 if [[ -z "$TXHASH" ]]; then
-    TXHASH=$(echo "$RESULT" | grep "txhash:" | awk '{print $2}' | tr -d '"' || echo "")
-fi
-
-if [[ -z "$TXHASH" ]]; then
-    echo "{\"success\": false, \"error\": \"Instantiation may have succeeded but failed to parse txhash\"}"
+    PAYLOAD_JSON='{"success":false,"error":"Instantiation may have succeeded but failed to parse txhash"}' emit_json
     exit 1
 fi
 
 # Query the transaction to get contract address
 echo "Retrieving contract address from transaction..." >&2
-TX_QUERY=$(xiond query tx "$TXHASH" \
+if ! TX_QUERY=$(xiond query tx "$TXHASH" \
     --node "$NODE_URL" \
-    --output json 2>&1)
-
-if [[ $? -ne 0 ]]; then
-    echo "{\"success\": false, \"error\": \"Failed to query transaction: $TX_QUERY\"}"
+    --output json 2>&1); then
+    PAYLOAD_JSON="$(ERR_MSG="$TX_QUERY" python3 - <<'PY'
+import json, os
+err = os.environ.get("ERR_MSG", "")
+print(json.dumps({"success": False, "error": f"Failed to query transaction: {err}"}))
+PY
+)" emit_json
     exit 1
 fi
 
-# Extract contract address from events
-CONTRACT_ADDRESS=$(echo "$TX_QUERY" | grep -o '"_contract_address","value":"[^"]*"' | grep -o 'xion1[^"]*' || echo "")
+CONTRACT_ADDRESS="$(RAW="$TX_QUERY" python3 - <<'PY'
+import json, os
+raw = os.environ.get("RAW", "")
+try:
+    data = json.loads(raw)
+except Exception:
+    print("")
+    raise SystemExit
 
-# Try with jq if available
-if [[ -z "$CONTRACT_ADDRESS" ]] && command -v jq &> /dev/null; then
-    CONTRACT_ADDRESS=$(echo "$TX_QUERY" | jq -r '.events[] | select(.type == "instantiate") | .attributes[] | select(.key == "_contract_address") | .value' 2>/dev/null || echo "")
-fi
+events = data.get("events") or []
+addr = ""
+for ev in events:
+    if ev.get("type") != "instantiate":
+        continue
+    for attr in ev.get("attributes") or []:
+        if attr.get("key") == "_contract_address":
+            addr = attr.get("value") or ""
+            break
+    if addr:
+        break
+print(addr)
+PY
+)"
 
 if [[ -z "$CONTRACT_ADDRESS" ]]; then
-    echo "{\"success\": true, \"txhash\": \"$TXHASH\", \"contract_address\": null, \"message\": \"Contract instantiated but address not found. Query transaction manually.\"}"
+    PAYLOAD_JSON="$(TXHASH="$TXHASH" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": True,
+    "txhash": os.environ["TXHASH"],
+    "contract_address": None,
+    "message": "Contract instantiated but address not found. Query transaction manually.",
+}))
+PY
+)" emit_json
 else
-    echo "{\"success\": true, \"txhash\": \"$TXHASH\", \"contract_address\": \"$CONTRACT_ADDRESS\", \"message\": \"Contract instantiated successfully\"}"
+    PAYLOAD_JSON="$(TXHASH="$TXHASH" CONTRACT_ADDRESS="$CONTRACT_ADDRESS" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": True,
+    "txhash": os.environ["TXHASH"],
+    "contract_address": os.environ["CONTRACT_ADDRESS"],
+    "message": "Contract instantiated successfully",
+}))
+PY
+)" emit_json
 fi

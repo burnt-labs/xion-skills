@@ -1,18 +1,26 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Create a new xiond account key pair
 # Usage: create-account.sh <keyname>
 # Outputs JSON to stdout, status messages to stderr
 
+emit_json() {
+    python3 - <<'PY'
+import json, os
+payload = json.loads(os.environ["PAYLOAD_JSON"])
+print(json.dumps(payload, ensure_ascii=False))
+PY
+}
+
 # Check if xiond is installed
 if ! command -v xiond &> /dev/null; then
-    echo "{\"success\": false, \"error\": \"xiond command not found. Please use the xiond-init skill to install xiond first.\"}"
+    PAYLOAD_JSON='{"success":false,"error":"xiond command not found. Please use the xiond-init skill to install xiond first."}' emit_json
     exit 1
 fi
 
 if [[ $# -lt 1 ]]; then
-    echo "{\"success\": false, \"error\": \"keyname is required\"}"
+    PAYLOAD_JSON='{"success":false,"error":"keyname is required"}' emit_json
     exit 1
 fi
 
@@ -20,32 +28,72 @@ KEYNAME="$1"
 
 # Check if keyname already exists
 if xiond keys show "$KEYNAME" &> /dev/null; then
-    echo "{\"success\": false, \"error\": \"Key '$KEYNAME' already exists\"}"
+    PAYLOAD_JSON="$(KEYNAME="$KEYNAME" python3 - <<'PY'
+import json, os
+keyname = os.environ["KEYNAME"]
+print(json.dumps({"success": False, "error": f"Key '{keyname}' already exists"}))
+PY
+)" emit_json
     exit 1
 fi
 
 # Create the key (non-interactive mode)
 echo "Creating account '$KEYNAME'..." >&2
-OUTPUT=$(xiond keys add "$KEYNAME" --output json 2>&1)
-
-if [[ $? -ne 0 ]]; then
-    echo "{\"success\": false, \"error\": \"Failed to create account: $OUTPUT\"}"
+if ! OUTPUT=$(xiond keys add "$KEYNAME" --output json 2>&1); then
+    PAYLOAD_JSON="$(ERR_MSG="$OUTPUT" python3 - <<'PY'
+import json, os
+err = os.environ.get("ERR_MSG", "")
+print(json.dumps({"success": False, "error": f"Failed to create account: {err}"}))
+PY
+)" emit_json
     exit 1
 fi
 
-# Extract address and pubkey from output
-ADDRESS=$(echo "$OUTPUT" | grep -o '"address":"[^"]*"' | cut -d'"' -f4 || echo "")
-PUBKEY=$(echo "$OUTPUT" | grep -o '"pubkey":"[^"]*"' | cut -d'"' -f4 || echo "")
+ADDRESS="$(RAW="$OUTPUT" python3 - <<'PY'
+import json, os
+raw = os.environ.get("RAW", "")
+try:
+    data = json.loads(raw)
+except Exception:
+    print("")
+else:
+    print(data.get("address", "") or "")
+PY
+)"
+PUBKEY="$(RAW="$OUTPUT" python3 - <<'PY'
+import json, os
+raw = os.environ.get("RAW", "")
+try:
+    data = json.loads(raw)
+except Exception:
+    print("")
+else:
+    pub = data.get("pubkey")
+    if isinstance(pub, dict):
+        print(pub.get("key", "") or pub.get("@value", "") or "")
+    else:
+        print(pub or "")
+PY
+)"
 
-# If JSON parsing failed, try alternative method
+# Fallback: query the keyring directly
 if [[ -z "$ADDRESS" ]]; then
-    ADDRESS=$(xiond keys show "$KEYNAME" -a 2>/dev/null || echo "")
-    PUBKEY=$(xiond keys show "$KEYNAME" -p 2>/dev/null || echo "")
+    ADDRESS="$(xiond keys show "$KEYNAME" -a 2>/dev/null || echo "")"
+    PUBKEY="$(xiond keys show "$KEYNAME" -p 2>/dev/null || echo "")"
 fi
 
 if [[ -z "$ADDRESS" ]]; then
-    echo "{\"success\": false, \"error\": \"Account created but failed to retrieve address\"}"
+    PAYLOAD_JSON='{"success":false,"error":"Account created but failed to retrieve address"}' emit_json
     exit 1
 fi
 
-echo "{\"success\": true, \"keyname\": \"$KEYNAME\", \"address\": \"$ADDRESS\", \"pubkey\": \"$PUBKEY\"}"
+PAYLOAD_JSON="$(KEYNAME="$KEYNAME" ADDRESS="$ADDRESS" PUBKEY="$PUBKEY" python3 - <<'PY'
+import json, os
+print(json.dumps({
+    "success": True,
+    "keyname": os.environ["KEYNAME"],
+    "address": os.environ["ADDRESS"],
+    "pubkey": os.environ.get("PUBKEY", ""),
+}))
+PY
+)" emit_json

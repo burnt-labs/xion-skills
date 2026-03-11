@@ -1,6 +1,6 @@
 ---
 name: xiond-init
-description: Install xiond CLI tool when not present in the environment. Use when user needs to install xiond, setup xion daemon, or verify xiond installation.
+description: Install and verify the `xiond` CLI on macOS/Linux. Use this whenever the user sees "xiond: command not found", needs to install/upgrade xiond, or is blocked from any Xion CLI task due to missing xiond.
 ---
 
 # Xiond Installation
@@ -14,6 +14,12 @@ Installs the `xiond` command-line interface (CLI) daemon for interacting with th
 3. Executes the appropriate package manager installation command for the detected OS
 4. Verifies installation by running `xiond version`
 5. Returns installation status and version information
+
+## Compatibility
+
+- Requires `bash` and `python3`
+- May require `sudo` (Linux installs)
+- Requires network access to Burnt package repositories (see `references/installation.md`)
 
 ## Usage
 

@@ -126,6 +126,7 @@ All scripts output JSON to stdout:
 **macOS:**
 - Ensure Homebrew is installed: `brew --version`
 - If tap fails, try: `brew tap burnt-labs/xion` manually
+ - If Homebrew is not installed, follow the installation guide at `https://brew.sh` and then rerun this skill.
 
 **Debian-based Linux:**
 - Requires sudo privileges
@@ -145,6 +146,7 @@ All scripts output JSON to stdout:
 - If installation fails, refer to `references/installation.md` for manual steps
 - Verify network connectivity to package repositories
 - Check system logs for detailed error messages
+ - For alternative installation methods (pre-built binaries, Docker images, or building from source), see the official XION docs section on xiond: `https://docs.burnt.com/xion/developers/getting-started-advanced/setup-local-environment/installation-prerequisites-setup-local-environment#xiond`
 
 ## References
 

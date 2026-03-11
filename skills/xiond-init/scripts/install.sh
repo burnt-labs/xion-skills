@@ -36,7 +36,12 @@ check_installed() {
 
 install_macos() {
     echo "Detected macOS, installing via Homebrew..." >&2
-    
+
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew is not installed. Please install Homebrew from https://brew.sh and re-run this script." >&2
+        return 1
+    fi
+
     # Tap the repository
     if ! brew tap burnt-labs/xion 2>&1; then
         echo "Failed to tap burnt-labs/xion repository" >&2
@@ -200,7 +205,7 @@ import json, os
 print(json.dumps({
     "success": True,
     "os": os.environ["OS"],
-    "installed": False,
+    "installed": True,
     "version": os.environ.get("VERSION", ""),
     "message": "xiond installed successfully",
 }))
